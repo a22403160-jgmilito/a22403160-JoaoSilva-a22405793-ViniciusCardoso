@@ -1,0 +1,14 @@
+Prompt 1 :
+
+Quero fazer um programa simples onde quero fazer receitas, e vou ter funcionalidades que vou pedir ao LLM, dentro do meu programa,
+vou ter uma funcao que vou dizer quais ingredientes eu tenho
+e o LLM vai me devolver uma sugestao de receita com os ingredientes que eu tenho, nao quero codigo, quero que complete essa tabela,
+| Tema | ex2 | |----------------------------------------------------------------|-------------------------------------------------------|
+| Grupo | João Gabriel(a22403160) e Vinicius Cardoso(a22405793) | | Funcionalidade baseada em LLM | | | Prompts esperadas para a func | | | Classes esperadas,
+e sua responsabilidade (1 frase por classe) | Classe A vai ser responsavel por... classe B vai ser responsavel por .... |
+
+Prompt 2 :
+eu preciso de mais duas funcionalidades já que essas duas são consideradas basicas e não contam
+
+Prompt 3 :
+não gostei do segundo, quero algo mais criativo
