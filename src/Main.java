@@ -21,6 +21,26 @@ public class Main {
         r2.adicionarIngrediente(new Ingrediente("queijo", 1, "fatia"));
         gestor.adicionarReceita(r2);
 
+        Receita r3 = new Receita("Massa com molho de tomate", "Massa simples para o dia a dia");
+        r3.adicionarIngrediente(new Ingrediente("massa", 100, "g"));
+        r3.adicionarIngrediente(new Ingrediente("molho de tomate", 100, "ml"));
+        r3.adicionarIngrediente(new Ingrediente("sal", 1, "pitada"));
+        gestor.adicionarReceita(r3);
+
+        Receita r4 = new Receita("Arroz com atum", "Prato rápido de arroz com atum enlatado");
+        r4.adicionarIngrediente(new Ingrediente("arroz", 1, "g"));
+        r4.adicionarIngrediente(new Ingrediente("atum", 1, "lata"));
+        r4.adicionarIngrediente(new Ingrediente("azeite", 1, "colher de sopa"));
+        r4.adicionarIngrediente(new Ingrediente("sal", 1, "pitada"));
+        gestor.adicionarReceita(r4);
+
+        Receita r5 = new Receita("Iogurte com fruta", "Sobremesa simples e fresca");
+        r5.adicionarIngrediente(new Ingrediente("iogurte", 1, "unidade"));
+        r5.adicionarIngrediente(new Ingrediente("banana", 1, "unidade"));
+        r5.adicionarIngrediente(new Ingrediente("mel", 1, "colher de sopa"));
+        gestor.adicionarReceita(r5);
+
+
         int opcao;
         do {
             System.out.println("\n--- MENU ---");
