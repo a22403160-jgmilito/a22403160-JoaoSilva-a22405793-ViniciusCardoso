@@ -5,9 +5,3 @@
 | Prompts esperadas para a func                                  | - “Tens estes ingredientes disponíveis: [listaDeIngredientes]. Sugere 1 receita simples que use apenas estes ingredientes (ou o máximo possível), indicando: nome da receita, lista de ingredientes com quantidades aproximadas e passos numerados.”                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | Classes esperadas, e sua responsabilidade (1 frase por classe) | Classe **Ingrediente** vai ser responsável por representar cada ingrediente (nome, quantidade e unidade).<br>Classe **Receita** vai ser responsável por guardar o nome da receita, lista de ingredientes e passos de preparação.<br>Classe **Despensa** vai ser responsável por armazenar e gerir os ingredientes que o utilizador tem disponíveis.<br>Classe **SugeridorLLM** vai ser responsável por construir o prompt com base na Despensa, chamar o LLM e receber o texto da receita sugerida.<br>Classe **GestorReceitas** vai ser responsável por coordenar a interação: ler os ingredientes do utilizador, pedir a sugestão ao SugeridorLLM e apresentar a receita final ao utilizador. |
 
-
-# ola
-
-## Ola2 
-- ola3
-- ola4
