@@ -24,7 +24,12 @@ public class AppGUI extends JFrame {
     private final SugeridorLLM sugeridor;
     private final GeradorReceitasLLM gerador;
 
+    // UI base
     private JTextField tfNome, tfQtd, tfUnidade, tfPref;
+
+    // ✅ NOVOS CAMPOS (Fusion + Estilo)
+    private JTextField tfCulinariaA, tfCulinariaB, tfEstilo;
+
     private DefaultListModel<String> modelDespensa;
     private JList<String> listDespensa;
 
@@ -34,6 +39,10 @@ public class AppGUI extends JFrame {
     private JLabel lbStatus;
     private JButton btGerarLLM;
     private JButton btSugerir;
+
+    // ✅ NOVOS BOTÕES (Fusion + Estilo)
+    private JButton btFusion;
+    private JButton btEstilo;
 
     // ✅ Construtor com engine (Opção 2)
     public AppGUI(LLMInteractionEngine engine) {
@@ -119,6 +128,7 @@ public class AppGUI extends JFrame {
         left.setBorder(new EmptyBorder(12, 12, 12, 12));
         left.setPreferredSize(new Dimension(330, 0));
 
+        // -------- Adicionar ingrediente --------
         left.add(tituloSecao("Adicionar ingrediente"));
         left.add(Box.createVerticalStrut(8));
 
@@ -151,6 +161,7 @@ public class AppGUI extends JFrame {
 
         left.add(linhaBotoes);
 
+        // -------- Preferências --------
         left.add(Box.createVerticalStrut(14));
         left.add(tituloSecao("Preferências"));
         left.add(Box.createVerticalStrut(8));
@@ -164,6 +175,40 @@ public class AppGUI extends JFrame {
         btSugerir.addActionListener(e -> sugerirReceitaAsync());
         left.add(btSugerir);
 
+        // -------- Receitas com LLM (NOVO) --------
+        left.add(Box.createVerticalStrut(14));
+        left.add(tituloSecao("Novas receitas (LLM)"));
+        left.add(Box.createVerticalStrut(8));
+
+        // Fusion
+        tfCulinariaA = criarCampo("ex: portuguesa");
+        tfCulinariaB = criarCampo("ex: mexicana");
+
+        left.add(label("Fusion: Culinária A"));
+        left.add(tfCulinariaA);
+        left.add(Box.createVerticalStrut(6));
+
+        left.add(label("Fusion: Culinária B"));
+        left.add(tfCulinariaB);
+        left.add(Box.createVerticalStrut(8));
+
+        btFusion = criarBotao("Criar receita Fusion", COR_BOTAO_WARN);
+        btFusion.addActionListener(e -> gerarFusionAsync());
+        left.add(btFusion);
+
+        left.add(Box.createVerticalStrut(10));
+
+        // Estilo
+        tfEstilo = criarCampo("ex: portuguesa, mexicana, vegetariana");
+        left.add(label("Receita típica por estilo"));
+        left.add(tfEstilo);
+        left.add(Box.createVerticalStrut(8));
+
+        btEstilo = criarBotao("Criar receita por estilo", COR_BOTAO_INFO);
+        btEstilo.addActionListener(e -> gerarPorEstiloAsync());
+        left.add(btEstilo);
+
+        // -------- Despensa --------
         left.add(Box.createVerticalStrut(14));
         left.add(tituloSecao("Despensa"));
         left.add(Box.createVerticalStrut(8));
@@ -175,7 +220,7 @@ public class AppGUI extends JFrame {
         listDespensa.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
 
         JScrollPane sp = new JScrollPane(listDespensa);
-        sp.setPreferredSize(new Dimension(0, 170));
+        sp.setPreferredSize(new Dimension(0, 150));
         left.add(sp);
 
         left.add(Box.createVerticalStrut(10));
@@ -225,8 +270,9 @@ public class AppGUI extends JFrame {
                 "Como usar:\n" +
                         "1) Gerar receitas (LLM)\n" +
                         "2) Adicionar ingredientes (nome, quantidade, unidade)\n" +
-                        "3) Escrever preferências (opcional)\n" +
-                        "4) Carregar em 'Sugerir receita'\n\n"
+                        "3) Sugerir receita (usa despensa + preferências)\n" +
+                        "4) Fusion: escolher 2 culinárias\n" +
+                        "5) Estilo: escolher 1 estilo culinário\n\n"
         ));
 
         rodape.add(btExemplo);
@@ -351,6 +397,79 @@ public class AppGUI extends JFrame {
         }.execute();
     }
 
+    private void gerarFusionAsync() {
+        String a = tfCulinariaA.getText().trim();
+        String b = tfCulinariaB.getText().trim();
+
+        if (a.isEmpty() || b.isEmpty()) {
+            escrever("Preencher as duas culinárias para a receita Fusion.\n\n");
+            return;
+        }
+
+        setBusy(true, "A criar receita Fusion com o LLM...");
+
+        new SwingWorker<Receita, Void>() {
+            @Override
+            protected Receita doInBackground() throws Exception {
+                return gerador.gerarReceitaFusion(a, b);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    Receita r = get();
+                    if (r == null) {
+                        escrever("O LLM não devolveu uma receita válida.\n\n");
+                    } else {
+                        escrever("=== Receita Fusion (" + a + " + " + b + ") ===\n");
+                        escrever(r.toString());
+                        escrever("\n\n");
+                    }
+                } catch (Exception e) {
+                    escrever("Falha ao criar Fusion: " + e.getMessage() + "\n\n");
+                } finally {
+                    setBusy(false, "Pronto.");
+                }
+            }
+        }.execute();
+    }
+
+    private void gerarPorEstiloAsync() {
+        String estilo = tfEstilo.getText().trim();
+
+        if (estilo.isEmpty()) {
+            escrever("Escrever um estilo (ex: portuguesa, mexicana, vegetariana).\n\n");
+            return;
+        }
+
+        setBusy(true, "A criar receita típica com o LLM...");
+
+        new SwingWorker<Receita, Void>() {
+            @Override
+            protected Receita doInBackground() throws Exception {
+                return gerador.gerarReceitaPorEstilo(estilo);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    Receita r = get();
+                    if (r == null) {
+                        escrever("O LLM não devolveu uma receita válida.\n\n");
+                    } else {
+                        escrever("=== Receita típica (" + estilo + ") ===\n");
+                        escrever(r.toString());
+                        escrever("\n\n");
+                    }
+                } catch (Exception e) {
+                    escrever("Falha ao criar por estilo: " + e.getMessage() + "\n\n");
+                } finally {
+                    setBusy(false, "Pronto.");
+                }
+            }
+        }.execute();
+    }
+
     private void removerIngredienteSelecionado() {
         int idx = listDespensa.getSelectedIndex();
         if (idx < 0) {
@@ -375,8 +494,12 @@ public class AppGUI extends JFrame {
 
     private void setBusy(boolean busy, String status) {
         lbStatus.setText(status);
+
         if (btGerarLLM != null) btGerarLLM.setEnabled(!busy);
         if (btSugerir != null) btSugerir.setEnabled(!busy);
+        if (btFusion != null) btFusion.setEnabled(!busy);
+        if (btEstilo != null) btEstilo.setEnabled(!busy);
+
         setCursor(busy ? Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR) : Cursor.getDefaultCursor());
     }
 
@@ -416,7 +539,6 @@ public class AppGUI extends JFrame {
         b.setFont(new Font("SansSerif", Font.BOLD, 13));
         b.setBackground(cor);
 
-        // escolher cor do texto com base no brilho do fundo
         b.setForeground(isCorClara(cor) ? Color.BLACK : Color.WHITE);
 
         b.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));

@@ -146,4 +146,54 @@ public class GeradorReceitasLLM {
         }
         return new Ingrediente(nome, qtd, unidade);
     }
+    public Receita gerarReceitaFusion(String culinariaA, String culinariaB)
+            throws IOException, NoSuchAlgorithmException, InterruptedException, KeyManagementException {
+
+        String prompt =
+                "Cria 1 receita NOVA (inventada) que combine " + culinariaA + " + " + culinariaB + ".\n" +
+                        "Formato OBRIGATÓRIO (sem mais texto):\n" +
+                        "NOME: <nome>\n" +
+                        "DESC: <descrição curta>\n" +
+                        "ING: <nome>|<quantidade>|<unidade>\n" +
+                        "ING: <nome>|<quantidade>|<unidade>\n" +
+                        "PASSO: <texto>\n" +
+                        "PASSO: <texto>\n";
+
+        String jsonResponse = engine.sendPrompt(prompt);
+        String texto = JSONUtils.getCompletionText(jsonResponse);
+
+        if (texto == null || texto.isBlank()) return null;
+
+        texto = texto.replace("\\n", "\n");
+
+        // Reaproveita o teu parser: vamos transformar 1 receita num bloco tipo lista
+        List<Receita> lista = parseReceitas(texto);
+        return lista.isEmpty() ? null : lista.get(0);
+    }
+
+    public Receita gerarReceitaPorEstilo(String estilo)
+            throws IOException, NoSuchAlgorithmException, InterruptedException, KeyManagementException {
+
+        String prompt =
+                "Cria 1 receita TÍPICA do estilo: " + estilo + ".\n" +
+                        "Formato OBRIGATÓRIO (sem mais texto):\n" +
+                        "NOME: <nome>\n" +
+                        "DESC: <descrição curta>\n" +
+                        "ING: <nome>|<quantidade>|<unidade>\n" +
+                        "ING: <nome>|<quantidade>|<unidade>\n" +
+                        "PASSO: <texto>\n" +
+                        "PASSO: <texto>\n";
+
+        String jsonResponse = engine.sendPrompt(prompt);
+        String texto = JSONUtils.getCompletionText(jsonResponse);
+
+        if (texto == null || texto.isBlank()) return null;
+
+        texto = texto.replace("\\n", "\n");
+
+        List<Receita> lista = parseReceitas(texto);
+        return lista.isEmpty() ? null : lista.get(0);
+    }
+
+
 }
