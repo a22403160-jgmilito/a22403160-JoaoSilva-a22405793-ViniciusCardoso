@@ -1,110 +1,26 @@
 package src;
-import java.util.List;
-import java.util.Scanner;
+
+import javax.swing.*;
 
 public class Main {
+
+    static String apiKey = "sk-h2XXOp1URDKGL722wonNnA"; // evita deixar isto no repositório
+    static String url = "https://modelos.ai.ulusofona.pt/v1/completions";
+    static String model = "gpt-4-turbo";
+    static boolean useHack = true;
+
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
 
-        Despensa despensa = new Despensa();
-        GestorReceitas gestor = new GestorReceitas();
-        SugeridorLLM sugeridor = new SugeridorLLM("modelo-falso");
+        // Criar o engine UMA vez e reutilizar na app toda
+        LLMInteractionEngine engine = new LLMInteractionEngine(url, apiKey, model, useHack);
 
-        // Cria algumas receitas de exemplo
-        Receita r1 = new Receita("Omelete simples", "Omelete básica de ovos");
-        r1.adicionarIngrediente(new Ingrediente("ovo", 2, "unidade"));
-        r1.adicionarIngrediente(new Ingrediente("sal", 1, "pitada"));
-        gestor.adicionarReceita(r1);
+        SwingUtilities.invokeLater(() -> {
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception ignored) {}
 
-        Receita r2 = new Receita("Sandes de queijo", "Sandes rápida");
-        r2.adicionarIngrediente(new Ingrediente("pão", 2, "fatia"));
-        r2.adicionarIngrediente(new Ingrediente("queijo", 1, "fatia"));
-        gestor.adicionarReceita(r2);
-
-        Receita r3 = new Receita("Massa com molho de tomate", "Massa simples para o dia a dia");
-        r3.adicionarIngrediente(new Ingrediente("massa", 100, "g"));
-        r3.adicionarIngrediente(new Ingrediente("molho de tomate", 100, "ml"));
-        r3.adicionarIngrediente(new Ingrediente("sal", 1, "pitada"));
-        gestor.adicionarReceita(r3);
-
-        Receita r4 = new Receita("Arroz com atum", "Prato rápido de arroz com atum enlatado");
-        r4.adicionarIngrediente(new Ingrediente("arroz", 1, "g"));
-        r4.adicionarIngrediente(new Ingrediente("atum", 1, "lata"));
-        r4.adicionarIngrediente(new Ingrediente("azeite", 1, "colher de sopa"));
-        r4.adicionarIngrediente(new Ingrediente("sal", 1, "pitada"));
-        gestor.adicionarReceita(r4);
-
-        Receita r5 = new Receita("Iogurte com fruta", "Sobremesa simples e fresca");
-        r5.adicionarIngrediente(new Ingrediente("iogurte", 1, "unidade"));
-        r5.adicionarIngrediente(new Ingrediente("banana", 1, "unidade"));
-        r5.adicionarIngrediente(new Ingrediente("mel", 1, "colher de sopa"));
-        gestor.adicionarReceita(r5);
-
-
-        int opcao;
-        do {
-            System.out.println("\n--- MENU ---");
-            System.out.println("1 - Adicionar ingrediente à despensa");
-            System.out.println("2 - Listar ingredientes da despensa");
-            System.out.println("3 - Sugerir receita");
-            System.out.println("0 - Sair");
-            System.out.print("Opção: ");
-            opcao = Integer.parseInt(sc.nextLine());
-
-            switch (opcao) {
-                case 1:
-                    System.out.print("Nome do ingrediente: ");
-                    String nome = sc.nextLine();
-                    System.out.print("Quantidade (número): ");
-                    double qtd = Double.parseDouble(sc.nextLine());
-                    System.out.print("Unidade (g, ml, etc.): ");
-                    String unidade = sc.nextLine();
-                    despensa.adicionarIngrediente(new Ingrediente(nome, qtd, unidade));
-                    System.out.println("Ingrediente adicionado.");
-                    break;
-
-                case 2:
-                    System.out.println("Ingredientes na despensa:");
-                    for (Ingrediente i : despensa.listarIngredientes()) {
-                        System.out.println(" - " + i);
-                    }
-                    break;
-
-                case 3:
-                    System.out.print("Preferências (ex: vegetariano, rápido, etc.): ");
-                    String pref = sc.nextLine();
-
-                    // Primeiro pede ao GestorReceitas as receitas compatíveis
-                    List<Receita> possiveis = gestor.sugerirReceitas(despensa);
-
-                    if (possiveis.isEmpty()) {
-                        System.out.println("Não há receitas possíveis com os ingredientes da despensa.");
-                    } else {
-                        Receita escolhida = sugeridor.sugerirReceita(despensa, pref, possiveis);
-                        if (escolhida == null) {
-                            // fallback: escolhe a primeira
-                            escolhida = possiveis.get(0);
-                        }
-
-                        // Gera passos se for preciso
-                        sugeridor.gerarPassos(escolhida);
-
-                        System.out.println("\nReceita sugerida:\n");
-                        System.out.println(escolhida);
-                    }
-                    break;
-
-                case 0:
-                    System.out.println("A sair...");
-                    break;
-
-                default:
-                    System.out.println("Opção inválida.");
-            }
-
-        } while (opcao != 0);
-
-        sc.close();
+            AppGUI gui = new AppGUI(engine); // <-- passa o engine para a GUI
+            gui.setVisible(true);
+        });
     }
 }
-
